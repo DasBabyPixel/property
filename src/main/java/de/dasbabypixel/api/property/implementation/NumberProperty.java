@@ -11,7 +11,9 @@ import de.dasbabypixel.api.property.Storage;
 
 @SuppressWarnings("javadoc")
 public class NumberProperty extends ObjectProperty<Number> implements NumberValue {
+
 	protected final Collection<NumberInvalidationListener> numberInvalidationListeners;
+
 	protected final Collection<NumberChangeListener> numberChangeListeners;
 
 	public static NumberProperty withNumber(final Number value) {
@@ -114,6 +116,30 @@ public class NumberProperty extends ObjectProperty<Number> implements NumberValu
 	}
 
 	@Override
+	public NumberValue max(final Number other) {
+		return this.mapToNumber(n -> Math.max(n.doubleValue(), other.doubleValue()));
+	}
+
+	@Override
+	public NumberValue min(final Number other) {
+		return this.mapToNumber(n -> Math.min(n.doubleValue(), other.doubleValue()));
+	}
+
+	@Override
+	public NumberValue max(final Property<Number> value) {
+		return this.mapToNumber(n -> Math.max(n.doubleValue(), value.getValue().doubleValue()))
+				.addDependencies(value)
+				.mapToNumber();
+	}
+
+	@Override
+	public NumberValue min(final Property<Number> value) {
+		return this.mapToNumber(n -> Math.min(n.doubleValue(), value.getValue().doubleValue()))
+				.addDependencies(value)
+				.mapToNumber();
+	}
+
+	@Override
 	public void addListener(final NumberInvalidationListener listener) {
 		this.numberInvalidationListeners.add(listener);
 	}
@@ -142,4 +168,5 @@ public class NumberProperty extends ObjectProperty<Number> implements NumberValu
 	public void setNumber(final Number number) {
 		this.setValue(number);
 	}
+
 }

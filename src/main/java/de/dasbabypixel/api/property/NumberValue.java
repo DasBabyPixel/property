@@ -8,6 +8,7 @@ import de.dasbabypixel.api.property.implementation.NumberProperty;
  * @author DasBabyPixel
  */
 public interface NumberValue extends Property<Number> {
+
 	/**
 	 * Adds a {@link NumberInvalidationListener} to this property
 	 * 
@@ -110,6 +111,18 @@ public interface NumberValue extends Property<Number> {
 	NumberValue subtract(final Property<Number> value);
 
 	/**
+	 * @param value
+	 * @return a property with the larger number
+	 */
+	NumberValue max(final Property<Number> value);
+
+	/**
+	 * @param value
+	 * @return a property with the smaller number
+	 */
+	NumberValue min(final Property<Number> value);
+
+	/**
 	 * @param number
 	 * @return multiplies this by the given {@link Number}
 	 */
@@ -132,6 +145,18 @@ public interface NumberValue extends Property<Number> {
 	 * @return subtracts the given {@link Number} from this
 	 */
 	NumberValue subtract(final Number number);
+
+	/**
+	 * @param number
+	 * @return a property with the larger number
+	 */
+	NumberValue max(final Number number);
+
+	/**
+	 * @param number
+	 * @return a property with the smaller number
+	 */
+	NumberValue min(final Number number);
 
 	/**
 	 * @param number
@@ -163,4 +188,5 @@ public interface NumberValue extends Property<Number> {
 	static NumberValue zero() {
 		return NumberProperty.zero();
 	}
+
 }
