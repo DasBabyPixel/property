@@ -158,6 +158,12 @@ public interface NumberValue extends Property<Number> {
 	 */
 	NumberValue min(final Number number);
 
+	@Override
+	NumberValue addDependencies(Property<?>... dependencies);
+
+	@Override
+	NumberValue removeDependencies(Property<?>... dependencies);
+
 	/**
 	 * @param number
 	 * @return an unmodifiable property with the given {@link Number}

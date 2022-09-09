@@ -140,6 +140,18 @@ public class NumberProperty extends ObjectProperty<Number> implements NumberValu
 	}
 
 	@Override
+	public NumberProperty addDependencies(Property<?>... dependencies) {
+		super.addDependencies(dependencies);
+		return this;
+	}
+
+	@Override
+	public NumberProperty removeDependencies(Property<?>... dependencies) {
+		super.removeDependencies(dependencies);
+		return this;
+	}
+
+	@Override
 	public void addListener(final NumberInvalidationListener listener) {
 		this.numberInvalidationListeners.add(listener);
 	}
