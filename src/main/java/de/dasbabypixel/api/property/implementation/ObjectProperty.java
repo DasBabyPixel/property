@@ -18,18 +18,32 @@ import de.dasbabypixel.api.property.Storage;
 
 @SuppressWarnings("javadoc")
 public class ObjectProperty<T> implements Property<T> {
+
 	protected final AtomicBoolean valid;
+
 	protected final AtomicBoolean bound;
+
 	protected final AtomicBoolean computor;
+
 	protected final AtomicBoolean bindingBidirectional;
+
 	protected final AtomicBoolean boundBidirectional;
+
 	protected final AtomicReference<Property<T>> boundTo;
+
 	protected final WeakReferenceObserver weakReferenceObserver;
+
 	protected final Collection<InvalidationListener> invalidationListeners;
+
 	protected final Collection<ChangeListener<? super T>> changeListeners;
+
 	protected final AtomicReference<T> currentValue;
+
 	protected final Storage<T> storage;
+
 	protected final BindingRedirectListener<T> bindingRedirectListener;
+
+	protected boolean invalidating = false;
 
 	public static <T> ObjectProperty<T> withStorage(final Storage<T> storage) {
 		final ObjectProperty<T> prop = new ObjectProperty<T>(storage);
@@ -121,7 +135,11 @@ public class ObjectProperty<T> implements Property<T> {
 	@Override
 	public void invalidate() {
 		this.valid.set(false);
-		this.fireInvalidationListeners();
+		if (!invalidating) {
+			invalidating = true;
+			this.fireInvalidationListeners();
+			invalidating = false;
+		}
 	}
 
 	@Override
@@ -239,10 +257,12 @@ public class ObjectProperty<T> implements Property<T> {
 	@Override
 	public <V> ObjectProperty<V> map(final Function<T, V> function) {
 		final ObjectProperty<V> o = new ObjectProperty<V>() {
+
 			@Override
 			protected V computeValue() {
 				return function.apply(ObjectProperty.this.getValue());
 			}
+
 		};
 		o.addDependencies(new Property[] {
 				this
@@ -266,10 +286,12 @@ public class ObjectProperty<T> implements Property<T> {
 	@Override
 	public BooleanValue mapToBoolean(final BooleanMapFunction<T> function) {
 		final BooleanProperty o = new BooleanProperty() {
+
 			@Override
 			protected Boolean computeValue() {
 				return function.apply(ObjectProperty.this.getValue());
 			}
+
 		};
 		o.addDependencies(new Property[] {
 				this
@@ -293,10 +315,12 @@ public class ObjectProperty<T> implements Property<T> {
 	@Override
 	public NumberValue mapToNumber(final NumberMapFunction<T> function) {
 		final NumberProperty o = new NumberProperty() {
+
 			@Override
 			protected Number computeValue() {
 				return function.apply(ObjectProperty.this.getValue());
 			}
+
 		};
 		o.addDependencies(new Property[] {
 				this
@@ -409,4 +433,5 @@ public class ObjectProperty<T> implements Property<T> {
 	public static boolean equals(final Object o1, final Object o2) {
 		return o1 == o2 || (o1 != null && o1.equals(o2)) || (o2 != null && o2.equals(o1));
 	}
+
 }
