@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import de.dasbabypixel.api.property.Storage;
 
-@SuppressWarnings("javadoc")
 public class AtomicStorage<T> implements Storage<T> {
 	
 	private final AtomicReference<T> value;

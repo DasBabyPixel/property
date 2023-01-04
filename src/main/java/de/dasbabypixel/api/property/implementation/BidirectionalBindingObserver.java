@@ -7,7 +7,6 @@ import de.dasbabypixel.api.property.ChangeListener;
 import de.dasbabypixel.api.property.InvalidationListener;
 import de.dasbabypixel.api.property.Property;
 
-@SuppressWarnings("javadoc")
 public abstract class BidirectionalBindingObserver<T> implements InvalidationListener, ChangeListener<T> {
 	private final int hashCode;
 

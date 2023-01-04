@@ -23,7 +23,7 @@ public class ObjectProperty<T> implements Property<T> {
 
 	protected final AtomicBoolean bound;
 
-	protected final AtomicBoolean computor;
+	protected final AtomicBoolean computer;
 
 	protected final AtomicBoolean bindingBidirectional;
 
@@ -45,7 +45,7 @@ public class ObjectProperty<T> implements Property<T> {
 
 	protected boolean invalidating = false;
 
-	public static <T> ObjectProperty<T> withStorage(final Storage<T> storage) {
+	public static <T> ObjectProperty<T> withObjectStorage(final Storage<T> storage) {
 		final ObjectProperty<T> prop = new ObjectProperty<T>(storage);
 		prop.getValue();
 		return prop;
@@ -68,7 +68,7 @@ public class ObjectProperty<T> implements Property<T> {
 	protected ObjectProperty(final Storage<T> storage) {
 		this.valid = new AtomicBoolean(false);
 		this.bound = new AtomicBoolean(false);
-		this.computor = new AtomicBoolean(false);
+		this.computer = new AtomicBoolean(false);
 		this.bindingBidirectional = new AtomicBoolean(false);
 		this.boundBidirectional = new AtomicBoolean(false);
 		this.boundTo = new AtomicReference<Property<T>>(null);
@@ -91,7 +91,7 @@ public class ObjectProperty<T> implements Property<T> {
 			final T newValue = this.computeValue();
 			if (!equals(oldValue, newValue)) {
 				this.currentValue.set(newValue);
-				if (!this.isBound() && !this.computor.get()) {
+				if (!this.isBound() && !this.computer.get()) {
 					this.storage.write(newValue);
 				}
 				this.fireChangeListeners(oldValue, newValue);
@@ -119,7 +119,7 @@ public class ObjectProperty<T> implements Property<T> {
 		if (this.isBound() && !this.isBoundBidirectional()) {
 			throw new UnsupportedOperationException("Can't change the value of a bound property!");
 		}
-		if (this.computor.get()) {
+		if (this.computer.get()) {
 			throw new UnsupportedOperationException("Can't change the value of a computor property!");
 		}
 		final T oldValue = this.currentValue.get();
@@ -149,7 +149,7 @@ public class ObjectProperty<T> implements Property<T> {
 
 	@Override
 	public void bind(final Property<T> other) {
-		if (this.computor.get()) {
+		if (this.computer.get()) {
 			throw new UnsupportedOperationException("Can't bind a computor property!");
 		}
 		synchronized (this.bound) {
@@ -174,7 +174,7 @@ public class ObjectProperty<T> implements Property<T> {
 
 	@Override
 	public void bindBidirectional(final Property<T> other) {
-		if (this.computor.get()) {
+		if (this.computer.get()) {
 			throw new UnsupportedOperationException("Can't bind a computor property!");
 		}
 		synchronized (this.bound) {
@@ -215,7 +215,7 @@ public class ObjectProperty<T> implements Property<T> {
 
 	@Override
 	public void unbind() {
-		if (this.computor.get()) {
+		if (this.computer.get()) {
 			throw new UnsupportedOperationException("Can't unbind a computor property!");
 		}
 		synchronized (this.bound) {
@@ -267,7 +267,7 @@ public class ObjectProperty<T> implements Property<T> {
 		o.addDependencies(new Property[] {
 				this
 		});
-		o.computor.set(true);
+		o.computer.set(true);
 		return o;
 	}
 
@@ -296,7 +296,7 @@ public class ObjectProperty<T> implements Property<T> {
 		o.addDependencies(new Property[] {
 				this
 		});
-		o.computor.set(true);
+		o.computer.set(true);
 		return o;
 	}
 
@@ -325,7 +325,7 @@ public class ObjectProperty<T> implements Property<T> {
 		o.addDependencies(new Property[] {
 				this
 		});
-		o.computor.set(true);
+		o.computer.set(true);
 		return o;
 	}
 

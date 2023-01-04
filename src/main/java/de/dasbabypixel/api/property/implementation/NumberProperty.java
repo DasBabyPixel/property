@@ -31,7 +31,7 @@ public class NumberProperty extends ObjectProperty<Number> implements NumberValu
 	public static NumberProperty constant(final Number number) {
 		final NumberProperty prop = new NumberProperty();
 		prop.setNumber(number);
-		prop.computor.set(true);
+		prop.computer.set(true);
 		return prop;
 	}
 
