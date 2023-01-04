@@ -1,9 +1,25 @@
-import java.awt.datatransfer.DataFlavor
-
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
+
+group 'de.dasbabypixel.api'
+version '1.0.4'
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(8))
+    withSourcesJar()
+    withJavadocJar()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'de.dasbabypixel.api'
+            artifactId 'property'
+            version '1.0.4'
+
+            from components.java
+        }
+    }
 }

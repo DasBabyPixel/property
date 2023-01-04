@@ -9,7 +9,6 @@ import de.dasbabypixel.api.property.NumberValue;
 import de.dasbabypixel.api.property.Property;
 import de.dasbabypixel.api.property.Storage;
 
-@SuppressWarnings("javadoc")
 public class NumberProperty extends ObjectProperty<Number> implements NumberValue {
 
 	protected final Collection<NumberInvalidationListener> numberInvalidationListeners;
@@ -70,29 +69,31 @@ public class NumberProperty extends ObjectProperty<Number> implements NumberValu
 	@Override
 	public NumberValue multiply(final Property<Number> other) {
 		return this.mapToNumber(n -> n.doubleValue() * other.getValue().doubleValue())
-				.addDependencies(other)
-				.mapToNumber();
+				.addDependencies(other);
+	}
+
+	@Override
+	public NumberValue pow(Property<Number> value) {
+		return this.mapToNumber(n -> Math.pow(n.doubleValue(), value.getValue().doubleValue()))
+				.addDependencies(value);
 	}
 
 	@Override
 	public NumberValue divide(final Property<Number> other) {
 		return this.mapToNumber(n -> n.doubleValue() / other.getValue().doubleValue())
-				.addDependencies(other)
-				.mapToNumber();
+				.addDependencies(other);
 	}
 
 	@Override
 	public NumberValue add(final Property<Number> other) {
 		return this.mapToNumber(n -> n.doubleValue() + other.getValue().doubleValue())
-				.addDependencies(other)
-				.mapToNumber();
+				.addDependencies(other);
 	}
 
 	@Override
 	public NumberValue subtract(final Property<Number> other) {
 		return this.mapToNumber(n -> n.doubleValue() - other.getValue().doubleValue())
-				.addDependencies(other)
-				.mapToNumber();
+				.addDependencies(other);
 	}
 
 	@Override
@@ -126,17 +127,20 @@ public class NumberProperty extends ObjectProperty<Number> implements NumberValu
 	}
 
 	@Override
+	public NumberValue pow(final Number value) {
+		return this.mapToNumber(n -> Math.pow(n.doubleValue(), value.doubleValue()));
+	}
+
+	@Override
 	public NumberValue max(final Property<Number> value) {
 		return this.mapToNumber(n -> Math.max(n.doubleValue(), value.getValue().doubleValue()))
-				.addDependencies(value)
-				.mapToNumber();
+				.addDependencies(value).mapToNumber();
 	}
 
 	@Override
 	public NumberValue min(final Property<Number> value) {
 		return this.mapToNumber(n -> Math.min(n.doubleValue(), value.getValue().doubleValue()))
-				.addDependencies(value)
-				.mapToNumber();
+				.addDependencies(value).mapToNumber();
 	}
 
 	@Override
