@@ -16,7 +16,6 @@ import de.dasbabypixel.api.property.NumberValue;
 import de.dasbabypixel.api.property.Property;
 import de.dasbabypixel.api.property.Storage;
 
-@SuppressWarnings("javadoc")
 public class ObjectProperty<T> implements Property<T> {
 
 	protected final AtomicBoolean valid;
@@ -160,9 +159,7 @@ public class ObjectProperty<T> implements Property<T> {
 			final T oldValue = this.currentValue.get();
 			final T newValue = other.getValue();
 			this.valid.set(true);
-			this.addDependencies(new Property[] {
-					other
-			});
+			this.addDependencies(other);
 			this.fireInvalidationListeners();
 			if (!equals(oldValue, newValue)) {
 				this.currentValue.set(newValue);
@@ -237,9 +234,7 @@ public class ObjectProperty<T> implements Property<T> {
 					obs.unregister(this);
 				} else {
 					final Property<T> other = this.boundTo.getAndSet(null);
-					this.removeDependencies(new Property[] {
-							other
-					});
+					this.removeDependencies(other);
 					final T oldValue = this.currentValue.get();
 					final T newValue = other.getValue();
 					this.storage.write(newValue);
@@ -264,9 +259,7 @@ public class ObjectProperty<T> implements Property<T> {
 			}
 
 		};
-		o.addDependencies(new Property[] {
-				this
-		});
+		o.addDependencies(this);
 		o.computer.set(true);
 		return o;
 	}
@@ -278,7 +271,7 @@ public class ObjectProperty<T> implements Property<T> {
 		}
 		final T value = this.getValue();
 		if (value instanceof Boolean) {
-			return this.mapToBoolean(n -> (Boolean) n);
+			return this.mapToBoolean(Boolean.class::cast);
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -293,9 +286,7 @@ public class ObjectProperty<T> implements Property<T> {
 			}
 
 		};
-		o.addDependencies(new Property[] {
-				this
-		});
+		o.addDependencies(this);
 		o.computer.set(true);
 		return o;
 	}
@@ -307,7 +298,7 @@ public class ObjectProperty<T> implements Property<T> {
 		}
 		final T value = this.getValue();
 		if (value instanceof Number) {
-			return this.mapToNumber(n -> (Number) n);
+			return this.mapToNumber(Number.class::cast);
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -322,9 +313,7 @@ public class ObjectProperty<T> implements Property<T> {
 			}
 
 		};
-		o.addDependencies(new Property[] {
-				this
-		});
+		o.addDependencies(this);
 		o.computer.set(true);
 		return o;
 	}
