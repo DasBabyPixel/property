@@ -34,7 +34,8 @@ public class BooleanProperty extends ObjectProperty<Boolean> implements BooleanV
 	}
 
 	/**
-	 * @param storage
+	 * @param storage the storage
+	 *
 	 * @return property with custom storage
 	 */
 	public static BooleanProperty withBooleanStorage(final Storage<Boolean> storage) {
@@ -44,7 +45,8 @@ public class BooleanProperty extends ObjectProperty<Boolean> implements BooleanV
 	}
 
 	/**
-	 * @param value
+	 * @param value the initial value
+	 *
 	 * @return property with initial value
 	 */
 	public static BooleanProperty withValue(final Boolean value) {
@@ -60,11 +62,13 @@ public class BooleanProperty extends ObjectProperty<Boolean> implements BooleanV
 
 	@Override
 	public BooleanValue and(final BooleanValue other) {
-		return this.mapToBoolean(b -> b && other.booleanValue()).addDependencies(other).mapToBoolean();
+		return this.mapToBoolean(b -> b && other.booleanValue()).addDependencies(other)
+				.mapToBoolean();
 	}
 
 	@Override
 	public BooleanValue or(final BooleanValue other) {
-		return this.mapToBoolean(b -> b || other.booleanValue()).addDependencies(other).mapToBoolean();
+		return this.mapToBoolean(b -> b || other.booleanValue()).addDependencies(other)
+				.mapToBoolean();
 	}
 }

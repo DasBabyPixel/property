@@ -19,29 +19,25 @@ import de.dasbabypixel.api.property.Storage;
 public class ObjectProperty<T> implements Property<T> {
 
 	protected final AtomicBoolean valid;
-
 	protected final AtomicBoolean bound;
-
 	protected final AtomicBoolean computer;
-
 	protected final AtomicBoolean bindingBidirectional;
-
 	protected final AtomicBoolean boundBidirectional;
-
 	protected final AtomicReference<Property<T>> boundTo;
-
 	protected final WeakReferenceObserver weakReferenceObserver;
-
 	protected final Collection<InvalidationListener> invalidationListeners;
-
 	protected final Collection<ChangeListener<? super T>> changeListeners;
-
+	/**
+	 * This is required so this objectProperty doesn't get gc'd
+	 */
+	protected final Collection<Property<?>> dependencies;
+	/**
+	 * Same as above
+	 */
+	protected final Collection<Object> loadingListeners;
 	protected final AtomicReference<T> currentValue;
-
 	protected final Storage<T> storage;
-
 	protected final BindingRedirectListener<T> bindingRedirectListener;
-
 	protected boolean invalidating = false;
 
 	public static <T> ObjectProperty<T> withObjectStorage(final Storage<T> storage) {
@@ -70,12 +66,14 @@ public class ObjectProperty<T> implements Property<T> {
 		this.computer = new AtomicBoolean(false);
 		this.bindingBidirectional = new AtomicBoolean(false);
 		this.boundBidirectional = new AtomicBoolean(false);
-		this.boundTo = new AtomicReference<Property<T>>(null);
+		this.boundTo = new AtomicReference<>(null);
 		this.weakReferenceObserver = new WeakReferenceObserver(this);
 		this.invalidationListeners = ConcurrentHashMap.newKeySet();
 		this.changeListeners = ConcurrentHashMap.newKeySet();
-		this.currentValue = new AtomicReference<T>(null);
-		this.bindingRedirectListener = new BindingRedirectListener<T>();
+		this.dependencies = ConcurrentHashMap.newKeySet();
+		this.loadingListeners = ConcurrentHashMap.newKeySet();
+		this.currentValue = new AtomicReference<>(null);
+		this.bindingRedirectListener = new BindingRedirectListener<>();
 		this.storage = storage;
 	}
 
@@ -119,7 +117,8 @@ public class ObjectProperty<T> implements Property<T> {
 			throw new UnsupportedOperationException("Can't change the value of a bound property!");
 		}
 		if (this.computer.get()) {
-			throw new UnsupportedOperationException("Can't change the value of a computor property!");
+			throw new UnsupportedOperationException(
+					"Can't change the value of a computor property!");
 		}
 		final T oldValue = this.currentValue.get();
 		if (!equals(oldValue, value)) {
@@ -149,7 +148,7 @@ public class ObjectProperty<T> implements Property<T> {
 	@Override
 	public void bind(final Property<T> other) {
 		if (this.computer.get()) {
-			throw new UnsupportedOperationException("Can't bind a computor property!");
+			throw new UnsupportedOperationException("Can't bind a computer property!");
 		}
 		synchronized (this.bound) {
 			if (!this.bound.compareAndSet(false, true)) {
@@ -166,7 +165,6 @@ public class ObjectProperty<T> implements Property<T> {
 				this.fireChangeListeners(oldValue, newValue);
 			}
 		}
-		// monitorexit(this.bound)
 	}
 
 	@Override
@@ -185,7 +183,8 @@ public class ObjectProperty<T> implements Property<T> {
 						this.boundTo.set(null);
 						this.boundBidirectional.set(false);
 						this.bindingBidirectional.set(false);
-						throw new UnsupportedOperationException("Other property already bound to another property!");
+						throw new UnsupportedOperationException(
+								"Other property already bound to another property!");
 					}
 					this.bindingBidirectional.set(false);
 				} else {
@@ -197,8 +196,9 @@ public class ObjectProperty<T> implements Property<T> {
 						this.fireInvalidationListeners();
 						this.fireChangeListeners(oldValue, newValue);
 					}
-					final BidirectionalBindingObserver<T> obs = new BidirectionalBindingObserver.Typed<T>(this,
-							(ObjectProperty<T>) other);
+					final BidirectionalBindingObserver<T> obs =
+							new BidirectionalBindingObserver.Typed<>(this,
+									(ObjectProperty<T>) other);
 					obs.register(this);
 					obs.register(other);
 				}
@@ -229,7 +229,8 @@ public class ObjectProperty<T> implements Property<T> {
 					this.bindingBidirectional.set(false);
 				} else if (this.bindingBidirectional.get()) {
 					final Property<T> other = this.boundTo.getAndSet(null);
-					final BidirectionalBindingObserver<?> obs = new BidirectionalBindingObserver.Untyped(other, this);
+					final BidirectionalBindingObserver<?> obs =
+							new BidirectionalBindingObserver.Untyped(other, this);
 					obs.unregister(other);
 					obs.unregister(this);
 				} else {
@@ -246,7 +247,6 @@ public class ObjectProperty<T> implements Property<T> {
 				}
 			}
 		}
-		// monitorexit(this.bound)
 	}
 
 	@Override
@@ -273,7 +273,7 @@ public class ObjectProperty<T> implements Property<T> {
 		if (value instanceof Boolean) {
 			return this.mapToBoolean(Boolean.class::cast);
 		}
-		throw new UnsupportedOperationException();
+		throw new ClassCastException();
 	}
 
 	@Override
@@ -300,7 +300,7 @@ public class ObjectProperty<T> implements Property<T> {
 		if (value instanceof Number) {
 			return this.mapToNumber(Number.class::cast);
 		}
-		throw new UnsupportedOperationException();
+		throw new ClassCastException();
 	}
 
 	@Override
@@ -337,20 +337,21 @@ public class ObjectProperty<T> implements Property<T> {
 		return this.bindingRedirectListener;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public ObjectProperty<T> addDependencies(final Property<?>... dependencies) {
 		for (final Property<?> dep : dependencies) {
+			this.dependencies.add(dep);
 			dep.getBindingRedirectListener().redirectInvalidation.add(this.weakReferenceObserver);
 		}
 		return this;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public ObjectProperty<T> removeDependencies(final Property<?>... dependencies) {
 		for (final Property<?> dep : dependencies) {
-			dep.getBindingRedirectListener().redirectInvalidation.remove(this.weakReferenceObserver);
+			this.dependencies.remove(dep);
+			dep.getBindingRedirectListener().redirectInvalidation.remove(
+					this.weakReferenceObserver);
 		}
 		return this;
 	}
@@ -358,21 +359,38 @@ public class ObjectProperty<T> implements Property<T> {
 	@Override
 	public void addListener(final ChangeListener<? super T> listener) {
 		this.changeListeners.add(listener);
+		addLoadingListener(listener);
 	}
 
 	@Override
 	public void removeListener(final ChangeListener<? super T> listener) {
 		this.changeListeners.remove(listener);
+		removeLoadingListener(listener);
 	}
 
 	@Override
 	public void addListener(final InvalidationListener listener) {
 		this.invalidationListeners.add(listener);
+		if (!(listener instanceof WeakReferenceObserver))
+			addLoadingListener(listener);
 	}
 
 	@Override
 	public void removeListener(final InvalidationListener listener) {
 		this.invalidationListeners.remove(listener);
+		if (!(listener instanceof WeakReferenceObserver))
+			removeLoadingListener(listener);
+	}
+
+	protected void addLoadingListener(Object listener) {
+		loadingListeners.add(listener);
+		weakReferenceObserver.raw = this;
+	}
+
+	protected void removeLoadingListener(Object listener) {
+		loadingListeners.remove(listener);
+		if (loadingListeners.isEmpty())
+			weakReferenceObserver.raw = null;
 	}
 
 	@Override

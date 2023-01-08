@@ -5,21 +5,20 @@ import java.lang.ref.WeakReference;
 import de.dasbabypixel.api.property.InvalidationListener;
 import de.dasbabypixel.api.property.Property;
 
-@SuppressWarnings("javadoc")
-public class WeakReferenceObserver implements InvalidationListener {
-	private final WeakReference<Property<?>> ref;
+class WeakReferenceObserver implements InvalidationListener {
+	private final WeakReference<ObjectProperty<?>> ref;
+	volatile ObjectProperty<?> raw;
 
-	public WeakReferenceObserver(final Property<?> binding) {
+	public WeakReferenceObserver(final ObjectProperty<?> binding) {
 		if (binding == null) {
 			throw new NullPointerException("Binding has to be specified.");
 		}
-		this.ref = new WeakReference<Property<?>>(binding);
+		this.ref = new WeakReference<>(binding);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void invalidated(final Property<?> observable) {
-		final Property<?> binding = this.ref.get();
+		final ObjectProperty<?> binding = this.ref.get();
 		if (binding == null) {
 			observable.getBindingRedirectListener().redirectInvalidation.remove(this);
 		} else {

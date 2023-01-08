@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'de.dasbabypixel.api'
-version '1.0.4'
+version '1.0.5'
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(8))
@@ -15,10 +15,9 @@ java {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId 'de.dasbabypixel.api'
             artifactId 'property'
-            version '1.0.4'
-
+            groupId = project.group;
+            version = project.version;
             from components.java
         }
     }
