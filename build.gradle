@@ -15,10 +15,17 @@ java {
 publishing {
     publications {
         maven(MavenPublication) {
-            artifactId 'property'
+            artifactId project.name
             groupId = project.group;
             version = project.version;
             from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = 'DarkCube'
+            credentials PasswordCredentials
+            url = uri 'https://dasbabypixel.ddnsfree.com/repository/darkcube/'
         }
     }
 }
