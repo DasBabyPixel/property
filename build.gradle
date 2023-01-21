@@ -13,11 +13,8 @@ java {
 }
 
 publishing {
-    publications {
-        maven(MavenPublication) {
-            artifactId 'property'
-            groupId = project.group;
-            version = project.version;
+    publications { c ->
+        darkcube(MavenPublication) {
             from components.java
         }
     }
