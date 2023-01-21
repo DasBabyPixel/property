@@ -14,7 +14,7 @@ java {
 
 publishing {
     publications {
-        javaPublication(MavenPublication) {
+        java(MavenPublication) {
             from components.java
         }
     }
