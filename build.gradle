@@ -13,9 +13,16 @@ java {
 }
 
 publishing {
-    publications { c ->
-        darkcube(MavenPublication) {
+    publications {
+        javaPublication(MavenPublication) {
             from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = 'DarkCube'
+            credentials PasswordCredentials
+            url = 'https://dasbabypixel.ddnsfree.com/repository/darkcube/'
         }
     }
 }
