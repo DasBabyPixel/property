@@ -51,7 +51,7 @@ publishing {
         maven {
             name = 'DarkCube'
             credentials PasswordCredentials
-            url = 'https://nexus.darkcube.eu/repository/darkcube/'
+            url = 'https://nexus.darkcube.eu/repository/dasbabypixel/'
         }
     }
 }
