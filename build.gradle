@@ -16,8 +16,8 @@ publishing {
     publications {
         maven(MavenPublication) {
             artifactId project.name
-            groupId = project.group;
-            version = project.version;
+            groupId = project.group
+            version = project.version
             from components.java
         }
     }
@@ -25,7 +25,7 @@ publishing {
         maven {
             name = 'DarkCube'
             credentials PasswordCredentials
-            url = uri 'https://dasbabypixel.ddnsfree.com/repository/darkcube/'
+            url = 'https://nexus.darkcube.eu/repository/dasbabypixel/'
         }
     }
 }
