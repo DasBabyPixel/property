@@ -9,9 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BindingRedirectListener<T> implements InvalidationListener, ChangeListener<T> {
 
-	@SuppressWarnings("javadoc")
 	public final Collection<InvalidationListener> redirectInvalidation;
-	@SuppressWarnings("javadoc")
 	public final Collection<ChangeListener<T>> redirectChange;
 
 	/**
