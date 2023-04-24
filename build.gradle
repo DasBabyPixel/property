@@ -3,43 +3,14 @@ plugins {
     id 'maven-publish'
 }
 
-group 'de.dasbabypixel.api'
-version '1.0.7'
+java.toolchain.languageVersion.set(JavaLanguageVersion.of(8))
 
-sourceCompatibility = 8
-targetCompatibility = 8
+group 'de.dasbabypixel.api'
+version '2.0.0-rc1'
 
 ext.moduleName = 'de.dasbabypixel.property'
 
-sourceSets {
-    moduleInfo {
-        java {
-            srcDir 'src/module-info/java'
-        }
-    }
-}
-
-compileModuleInfoJava {
-    sourceCompatibility = 9
-    targetCompatibility = 9
-
-    inputs.property("moduleName", moduleName)
-
-    doFirst {
-        classpath += sourceSets.main.compileClasspath
-
-        options.compilerArgs = [
-                '--module-path', classpath.asPath,
-                '--add-modules', 'ALL-SYSTEM',
-                '-d', sourceSets.main.output.classesDirs.asPath
-        ]
-    }
-}
-
-jar {
-    from sourceSets.main.output
-    from sourceSets.moduleInfo.output
-}
+tasks.jar.manifest.attributes('Automatic-Module-Name': 'de.dasbabypixel.property')
 
 publishing {
     publications {
@@ -54,4 +25,8 @@ publishing {
             url = 'https://nexus.darkcube.eu/repository/dasbabypixel/'
         }
     }
+}
+
+dependencies {
+    api 'de.dasbabypixel:annotations:0.0.1-SNAPSHOT'
 }

@@ -5,7 +5,6 @@ package de.dasbabypixel.api.property;
  * @param <T>
  */
 public interface ExternalStorage<T> extends Storage<T> {
-	
 	@Override
 	default boolean checkForChanges() {
 		return true;

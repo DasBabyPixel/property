@@ -7,7 +7,6 @@ package de.dasbabypixel.api.property;
 public interface BooleanMapFunction<T>
 {
     /**
-     * @param value
      * @return the boolean from this {@link BooleanMapFunction}
      */
     boolean apply(final T value);
