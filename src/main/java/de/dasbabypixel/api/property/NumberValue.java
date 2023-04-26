@@ -54,14 +54,6 @@ public interface NumberValue extends Property<AbstractNumberHolder> {
 		return NumberProperty.withValue(number);
 	}
 
-	/**
-	 * @return a {@link NumberValue} with 0 as initial value
-	 */
-	@Api
-	static NumberValue zero() {
-		return NumberProperty.zero();
-	}
-
 	@Api
 	static NumberValue withStorage(Storage<Number> storage) {
 		return NumberProperty.withStorage(storage);

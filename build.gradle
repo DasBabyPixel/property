@@ -3,10 +3,15 @@ plugins {
     id 'maven-publish'
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(8))
 
 group 'de.dasbabypixel.api'
-version '2.0.0-rc1'
+version '2.0.0-rc12'
 
 ext.moduleName = 'de.dasbabypixel.property'
 

@@ -27,6 +27,10 @@ public interface Property<T> {
 		return new ObjectProperty<>(new ComputerStorage<>(supplier));
 	}
 
+	static <T> Property<T> empty() {
+		return withValue(null);
+	}
+
 	/**
 	 * Adds a {@link ChangeListener}
 	 */
@@ -196,14 +200,14 @@ public interface Property<T> {
 	NumberValue mapToNumber(final NumberMapFunction<T> function);
 
 	@Api
-	NumberValue mapToNumber(final DoubleMapFunction<T> function);
+	NumberValue mapToDouble(final DoubleMapFunction<T> function);
 
 	@Api
-	NumberValue mapToNumber(final FloatMapFunction<T> function);
+	NumberValue mapToFloat(final FloatMapFunction<T> function);
 
 	@Api
-	NumberValue mapToNumber(final IntegerMapFunction<T> function);
+	NumberValue mapToInteger(final IntegerMapFunction<T> function);
 
 	@Api
-	NumberValue mapToNumber(final LongMapFunction<T> function);
+	NumberValue mapToLong(final LongMapFunction<T> function);
 }

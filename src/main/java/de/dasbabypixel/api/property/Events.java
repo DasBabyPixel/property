@@ -27,6 +27,7 @@ class Events<T> {
 			Property<?> property = ref.get();
 			if (property == null) {
 				this.property.dependants.remove(i--);
+				size--;
 				continue;
 			}
 			property.invalidate();

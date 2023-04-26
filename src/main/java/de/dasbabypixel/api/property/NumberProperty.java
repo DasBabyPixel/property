@@ -7,6 +7,7 @@ import de.dasbabypixel.api.property.NumberUtils.NNHAlgorithm;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements NumberValue {
@@ -21,10 +22,6 @@ class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements N
 	private NumberProperty(Storage<AbstractNumberHolder> storage) {
 		super(storage);
 		this.events = nevents;
-	}
-
-	public static NumberProperty zero() {
-		return withValue(0);
 	}
 
 	public static NumberProperty withValue(Number number) {
@@ -176,6 +173,7 @@ class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements N
 	@Api
 	@Override
 	protected AbstractNumberHolder computeValue() {
+		value.partner().pollFromPartner();
 		return value.partner();
 	}
 
@@ -475,24 +473,29 @@ class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements N
 	}
 
 	private NumberValue mapToNumberNNH(HolderPair<NNHAlgorithm> pair, Property<? extends Number> value) {
-		return mapToNumber((NumberMapFunction<AbstractNumberHolder>) val -> {
-			pair.algorithm().calculate(value(), value.value(), pair.holder());
-			return pair.holder();
-		});
+		return calculate(val -> pair.algorithm().calculate(value(), value.value(), val), pair.holder()).addDependencies(value);
 	}
 
 	private NumberValue mapToNumberNNH(HolderPair<NNHAlgorithm> pair, Number value) {
-		return mapToNumber((NumberMapFunction<AbstractNumberHolder>) val -> {
-			pair.algorithm().calculate(value(), value, pair.holder());
-			return pair.holder();
-		});
+		return calculate(val -> pair.algorithm().calculate(value(), value, val), pair.holder());
 	}
 
 	private NumberValue mapToNumberNH(HolderPair<NHAlgorithm> pair) {
-		return mapToNumber((NumberMapFunction<AbstractNumberHolder>) val -> {
-			pair.algorithm().calculate(value(), pair.holder());
-			return pair.holder();
-		});
+		return calculate(val -> pair.algorithm().calculate(value(), val), pair.holder());
+	}
+
+	private NumberValue calculate(Consumer<AbstractNumberHolder> modifier, AbstractNumberHolder holder) {
+		NumberValue val = new NumberProperty(holder) {
+			@Override
+			protected AbstractNumberHolder computeValue() {
+				AbstractNumberHolder val = super.computeValue();
+				modifier.accept(val);
+				return val;
+			}
+		};
+		val.invalidate();
+		val.addDependencies(this);
+		return val;
 	}
 
 	private class NEvents extends Events<AbstractNumberHolder> {

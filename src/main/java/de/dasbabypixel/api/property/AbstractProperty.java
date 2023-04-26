@@ -121,48 +121,42 @@ abstract class AbstractProperty<T> implements Property<T> {
 				}
 				res.add(p);
 			}
-			return res;
+			return Collections.unmodifiableCollection(res);
 		}
 	}
 
 	@Override
 	public T value() {
-		if (!valid) {
-			try {
-				lock.writeLock().lock();
-				if (valid)
-					return value;
-				T oldValue = value;
-				value = computeValue();
-				if (!equals(oldValue, value)) {
-					if (storage != null && storage.writable())
-						storage.write(value);
-					events.change(oldValue, value);
+		if (!valid || (storage != null && storage.checkForChanges())) {
+			while (true) {
+				try {
+					lock.writeLock().lock();
+					if (valid)
+						return value;
+					bound:
+					if (boundTo != null) {
+						if (!boundTo.lock.writeLock().tryLock())
+							continue;
+						try {
+							if (boundTo.boundTo == this)
+								break bound;
+							return boundTo.value();
+						} finally {
+							boundTo.lock.writeLock().unlock();
+						}
+					}
+					T oldValue = value;
+					value = computeValue();
+					if (!equals(oldValue, value)) {
+						if (storage != null && storage.writable())
+							storage.write(value);
+						events.change(oldValue, value);
+					}
+					valid = true;
+				} finally {
+					lock.writeLock().unlock();
 				}
-				valid = true;
-			} finally {
-				lock.writeLock().unlock();
-			}
-		} else if (storage != null && storage.checkForChanges()) {
-			try {
-				lock.readLock().lock();
-				T oldValue = value;
-				T newValue = computeValue();
-				if (equals(oldValue, newValue))
-					return value;
-			} finally {
-				lock.readLock().unlock();
-			}
-			try {
-				lock.writeLock().lock();
-				T oldValue = value;
-				T newValue = computeValue();
-				if (equals(oldValue, newValue))
-					return value;
-				value = newValue;
-				storage.write(value);
-			} finally {
-				lock.writeLock().unlock();
+				break;
 			}
 		}
 		return value;
@@ -269,14 +263,15 @@ abstract class AbstractProperty<T> implements Property<T> {
 					return;
 				if (!boundTo.lock.writeLock().tryLock())
 					continue;
-
-				boolean bidirectional = boundTo.boundTo == this;
-
-				if (bidirectional) {
-					boundTo.boundTo = null;
+				try {
+					boolean bidirectional = boundTo.boundTo == this;
+					if (bidirectional) {
+						boundTo.boundTo = null;
+					} else {
+						boundTo.removeListener(dependencyListener);
+					}
+				} finally {
 					boundTo.lock.writeLock().unlock();
-				} else {
-					boundTo.removeListener(dependencyListener);
 				}
 				boundTo = null;
 				return;
@@ -302,21 +297,24 @@ abstract class AbstractProperty<T> implements Property<T> {
 				lock.writeLock().lock();
 				if (!property.lock.writeLock().tryLock())
 					continue;
-				if (property.boundTo != null)
-					throw new IllegalStateException("Bidirectional binding partner already bound!");
-				boundTo = property;
-				property.boundTo = this;
-				T oldValue = value;
-				T newValue = other.value();
-				if (equals(oldValue, newValue))
+				try {
+					if (property.boundTo != null)
+						throw new IllegalStateException("Bidirectional binding partner already bound!");
+					boundTo = property;
+					property.boundTo = this;
+					T oldValue = value;
+					T newValue = other.value();
+					if (equals(oldValue, newValue))
+						return;
+					value = newValue;
+					storage.write(value);
+					valid = true;
+					events.invalidate();
+					events.change(oldValue, value);
 					return;
-				value = newValue;
-				storage.write(value);
-				valid = true;
-				events.invalidate();
-				events.change(oldValue, value);
-				property.lock.writeLock().unlock();
-				return;
+				} finally {
+					property.lock.writeLock().unlock();
+				}
 			} finally {
 				lock.writeLock().unlock();
 			}
@@ -411,25 +409,25 @@ abstract class AbstractProperty<T> implements Property<T> {
 
 	@Api
 	@Override
-	public NumberValue mapToNumber(DoubleMapFunction<T> function) {
+	public NumberValue mapToDouble(DoubleMapFunction<T> function) {
 		return NumberValue.computing(() -> function.apply(value())).addDependencies(this);
 	}
 
 	@Api
 	@Override
-	public NumberValue mapToNumber(FloatMapFunction<T> function) {
+	public NumberValue mapToFloat(FloatMapFunction<T> function) {
 		return NumberValue.computing(() -> function.apply(value())).addDependencies(this);
 	}
 
 	@Api
 	@Override
-	public NumberValue mapToNumber(IntegerMapFunction<T> function) {
+	public NumberValue mapToInteger(IntegerMapFunction<T> function) {
 		return NumberValue.computing(() -> function.apply(value())).addDependencies(this);
 	}
 
 	@Api
 	@Override
-	public NumberValue mapToNumber(LongMapFunction<T> function) {
+	public NumberValue mapToLong(LongMapFunction<T> function) {
 		return NumberValue.computing(() -> function.apply(value())).addDependencies(this);
 	}
 

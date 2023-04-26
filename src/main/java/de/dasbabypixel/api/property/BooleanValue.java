@@ -53,7 +53,7 @@ public interface BooleanValue extends Property<Boolean> {
 	boolean booleanValue();
 
 	/**
-	 * @return property (this && other)
+	 * @return property (this {@literal &&} other)
 	 */
 	@Api
 	BooleanValue and(final Property<? extends Boolean> value);
