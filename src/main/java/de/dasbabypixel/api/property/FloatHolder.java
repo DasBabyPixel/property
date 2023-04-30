@@ -22,7 +22,6 @@ public class FloatHolder extends AbstractNumberHolder {
         this.partner = new FloatHolder(this, storage);
     }
 
-
     private FloatHolder(FloatHolder partner, FloatStorage storage) {
         this.partner = partner;
         this.storage = storage;
@@ -34,9 +33,19 @@ public class FloatHolder extends AbstractNumberHolder {
         write(partner.floatValue());
     }
 
+    @Override
+    public boolean checkForChanges() {
+        return storage.checkForChanges();
+    }
+
+    @Override
+    void pollFromStorage() {
+        get();
+    }
+
     private void write(float number) {
         storage.write(number);
-        current = storage.read();
+        current = number;
     }
 
     private float get() {
@@ -66,12 +75,12 @@ public class FloatHolder extends AbstractNumberHolder {
 
     @Override
     public int hashCode() {
-        return Float.hashCode(get());
+        return Float.hashCode(current);
     }
 
     @Override
     public String toString() {
-        return Float.toString(floatValue());
+        return Float.toString(current);
     }
 
     @Override
@@ -81,8 +90,8 @@ public class FloatHolder extends AbstractNumberHolder {
 
     @Override
     void pollFromPartner() {
-        if (storage.writable()) write(partner.floatValue());
-        else current = partner.get();
+        if (storage.writable()) write(partner.current);
+        else current = partner.current;
     }
 
     @Override

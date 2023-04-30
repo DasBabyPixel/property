@@ -23,7 +23,6 @@ public class IntegerHolder extends AbstractNumberHolder {
         this.partner = new IntegerHolder(this, storage);
     }
 
-
     private IntegerHolder(IntegerHolder partner, IntegerStorage storage) {
         this.partner = partner;
         this.storage = storage;
@@ -35,9 +34,19 @@ public class IntegerHolder extends AbstractNumberHolder {
         write(partner.intValue());
     }
 
+    @Override
+    public boolean checkForChanges() {
+        return storage.checkForChanges();
+    }
+
     private void write(int number) {
         storage.write(number);
-        current = storage.read();
+        current = number;
+    }
+
+    @Override
+    void pollFromStorage() {
+        get();
     }
 
     private int get() {
@@ -67,7 +76,7 @@ public class IntegerHolder extends AbstractNumberHolder {
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(get());
+        return Integer.hashCode(current);
     }
 
     @Override
@@ -75,12 +84,12 @@ public class IntegerHolder extends AbstractNumberHolder {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         IntegerHolder that = (IntegerHolder) o;
-        return that.intValue() == intValue();
+        return that.current == current;
     }
 
     @Override
     public String toString() {
-        return Integer.toString(intValue());
+        return Integer.toString(current);
     }
 
     @Override
@@ -90,8 +99,8 @@ public class IntegerHolder extends AbstractNumberHolder {
 
     @Override
     void pollFromPartner() {
-        if (storage.writable()) write(partner.intValue());
-        else current = partner.get();
+        if (storage.writable()) write(partner.current);
+        else current = partner.current;
     }
 
     @Override

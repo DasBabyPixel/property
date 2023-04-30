@@ -12,7 +12,6 @@ import java.util.function.Supplier;
  */
 @Api
 public interface NumberValue extends Property<AbstractNumberHolder> {
-
     @Api
     @Deprecated
     static NumberValue computing(Supplier<Number> supplier) {

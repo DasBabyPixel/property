@@ -22,7 +22,6 @@ public class LongHolder extends AbstractNumberHolder {
         this.partner = new LongHolder(this, storage);
     }
 
-
     private LongHolder(LongHolder partner, LongStorage storage) {
         this.partner = partner;
         this.storage = storage;
@@ -34,9 +33,19 @@ public class LongHolder extends AbstractNumberHolder {
         write(partner.longValue());
     }
 
+    @Override
+    public boolean checkForChanges() {
+        return storage.checkForChanges();
+    }
+
+    @Override
+    void pollFromStorage() {
+        get();
+    }
+
     private void write(long number) {
         storage.write(number);
-        current = storage.read();
+        current = number;
     }
 
     private long get() {
@@ -66,7 +75,7 @@ public class LongHolder extends AbstractNumberHolder {
 
     @Override
     public int hashCode() {
-        return Long.hashCode(get());
+        return Long.hashCode(current);
     }
 
     @Override
@@ -79,7 +88,7 @@ public class LongHolder extends AbstractNumberHolder {
 
     @Override
     public String toString() {
-        return Long.toString(longValue());
+        return Long.toString(current);
     }
 
     @Override
@@ -89,8 +98,8 @@ public class LongHolder extends AbstractNumberHolder {
 
     @Override
     void pollFromPartner() {
-        if (storage.writable()) write(partner.longValue());
-        else current = partner.get();
+        if (storage.writable()) write(partner.current);
+        else current = partner.current;
     }
 
     @Override

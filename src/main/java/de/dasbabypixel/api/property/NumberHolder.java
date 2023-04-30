@@ -60,6 +60,11 @@ public class NumberHolder extends AbstractNumberHolder {
     }
 
     @Override
+    void pollFromStorage() {
+        get();
+    }
+
+    @Override
     public String toString() {
         return number.toString();
     }

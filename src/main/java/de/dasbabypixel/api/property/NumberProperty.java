@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements NumberValue {
+
     private final NEvents nevents = new NEvents();
     private boolean computer = false;
 
@@ -69,7 +70,7 @@ class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements N
     @Api
     @Override
     protected boolean equals(Object o1, Object o2) {
-        return o1 == o2;
+        return o1 == o2 || o1.equals(o2);
     }
 
     @Api
@@ -128,6 +129,48 @@ class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements N
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public AbstractNumberHolder value() {
+        if (!valid || value.checkForChanges()) {
+            while (true) {
+                try {
+                    lock.writeLock().lock();
+                    bound:
+                    if (boundTo != null) {
+                        if (!boundTo.lock.writeLock().tryLock()) continue;
+                        try {
+                            if (boundTo.boundTo == this)
+                                break bound;
+                            AbstractNumberHolder newValue = value.partner();
+                            newValue.set(boundTo.value());
+                            AbstractNumberHolder oldValue = value;
+                            if (!equals(oldValue, newValue)) {
+                                value = newValue;
+                                if (valid) events.invalidate();
+                                events.change(oldValue, newValue);
+                            }
+                            valid = true;
+                            return value;
+                        } finally {
+                            boundTo.lock.writeLock().unlock();
+                        }
+                    }
+                    AbstractNumberHolder oldValue = value;
+                    value = computeValue();
+                    if (!equals(oldValue, value)) {
+                        if (valid) events.invalidate();
+                        events.change(oldValue, value);
+                    }
+                    valid = true;
+                } finally {
+                    lock.writeLock().unlock();
+                }
+                break;
+            }
+        }
+        return value;
+    }
+
     @Api
     @Override
     public Storage<AbstractNumberHolder> storage() {
@@ -152,6 +195,7 @@ class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements N
     @Override
     protected AbstractNumberHolder computeValue() {
         value.partner().pollFromPartner();
+        value.partner().pollFromStorage();
         return value.partner();
     }
 

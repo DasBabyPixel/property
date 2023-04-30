@@ -18,6 +18,15 @@ public abstract class AbstractNumberHolder extends Number implements StorageCapa
         return null;
     }
 
+    @Override
+    public boolean checkForChanges() {
+        return false;
+    }
+
+    @Internal
+    void pollFromStorage() {
+    }
+
     @Internal
     void pollFromPartner() {
     }

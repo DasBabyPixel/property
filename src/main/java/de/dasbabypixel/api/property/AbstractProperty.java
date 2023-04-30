@@ -153,7 +153,16 @@ abstract class AbstractProperty<T> implements Property<T> {
                         try {
                             if (boundTo.boundTo == this)
                                 break bound;
-                            return boundTo.value();
+                            T newValue = boundTo.value();
+                            T oldValue = value;
+                            if (!equals(oldValue, newValue)) {
+                                value = newValue;
+                                if (storage != null && storage.writable())
+                                    storage.write(value);
+                                events.change(oldValue, newValue);
+                            }
+                            valid = true;
+                            return value;
                         } finally {
                             boundTo.lock.writeLock().unlock();
                         }
@@ -271,10 +280,10 @@ abstract class AbstractProperty<T> implements Property<T> {
             boundTo.addListener(dependencyListener);
             valid = false;
             events.invalidate();
-            value();
         } finally {
             lock.writeLock().unlock();
         }
+        value();
     }
 
     @Api

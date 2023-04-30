@@ -29,11 +29,20 @@ public final class DoubleHolder extends AbstractNumberHolder {
         this.storage = storage;
     }
 
-
     private DoubleHolder(DoubleHolder partner) {
         this.partner = partner;
         this.storage = new DoubleStorage.Simple();
         write(partner.doubleValue());
+    }
+
+    @Override
+    public boolean checkForChanges() {
+        return storage.checkForChanges();
+    }
+
+    @Override
+    void pollFromStorage() {
+        get();
     }
 
     @Override
@@ -48,7 +57,7 @@ public final class DoubleHolder extends AbstractNumberHolder {
 
     private void write(double number) {
         storage.write(number);
-        current = storage.read();
+        current = number;
     }
 
     private double get() {
@@ -78,12 +87,12 @@ public final class DoubleHolder extends AbstractNumberHolder {
 
     @Override
     public int hashCode() {
-        return Double.hashCode(get());
+        return Double.hashCode(current);
     }
 
     @Override
     public String toString() {
-        return Double.toString(doubleValue());
+        return Double.toString(current);
     }
 
     @Override
@@ -93,8 +102,8 @@ public final class DoubleHolder extends AbstractNumberHolder {
 
     @Override
     void pollFromPartner() {
-        if (storage.writable()) write(partner.doubleValue());
-        else current = partner.get();
+        if (storage.writable()) write(partner.current);
+        else current = partner.current;
     }
 
     @Override
