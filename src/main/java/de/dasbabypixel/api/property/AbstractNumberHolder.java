@@ -2,34 +2,33 @@ package de.dasbabypixel.api.property;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
 
-public abstract class AbstractNumberHolder extends Number {
+public abstract class AbstractNumberHolder extends Number implements StorageCapable {
 
-	@Override
-	public abstract int hashCode();
+    @Override
+    public abstract int hashCode();
 
-	@Override
-	public abstract boolean equals(Object obj);
+    @Override
+    public abstract boolean equals(Object obj);
 
-	@Override
-	public abstract String toString();
+    @Override
+    public abstract String toString();
 
-	@Internal
-	AbstractNumberHolder partner() {
-		return null;
-	}
+    @Internal
+    AbstractNumberHolder partner() {
+        return null;
+    }
 
-	@Internal
-	void pollFromPartner() {
-	}
+    @Internal
+    void pollFromPartner() {
+    }
 
-	public abstract void set(Number number);
+    public abstract void set(Number number);
 
-	public abstract void set(double number);
+    public abstract void set(double number);
 
-	public abstract void set(float number);
+    public abstract void set(float number);
 
-	public abstract void set(long number);
+    public abstract void set(long number);
 
-	public abstract void set(int number);
-
+    public abstract void set(int number);
 }
