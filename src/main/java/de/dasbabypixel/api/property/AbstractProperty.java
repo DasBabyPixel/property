@@ -18,7 +18,6 @@ abstract class AbstractProperty<T> implements Property<T> {
 	protected volatile boolean valid;
 	protected AbstractProperty<T> boundTo;
 	protected boolean invalidating = false;
-	protected final InvalidationListener dependencyListener = property -> invalidate();
 	protected int updateStatus = 0;
 
 	public AbstractProperty(Storage<T> storage) {
@@ -237,7 +236,7 @@ abstract class AbstractProperty<T> implements Property<T> {
 			if (boundTo != null)
 				throw new IllegalStateException("Property already bound!");
 			boundTo = (AbstractProperty<T>) other;
-			boundTo.addListener(dependencyListener);
+			boundTo.dependants.add(reference);
 			valid = false;
 			events.invalidate();
 			value();
@@ -268,7 +267,7 @@ abstract class AbstractProperty<T> implements Property<T> {
 					if (bidirectional) {
 						boundTo.boundTo = null;
 					} else {
-						boundTo.removeListener(dependencyListener);
+						boundTo.dependants.remove(reference);
 					}
 				} finally {
 					boundTo.lock.writeLock().unlock();
