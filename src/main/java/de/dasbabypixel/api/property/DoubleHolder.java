@@ -1,119 +1,138 @@
 package de.dasbabypixel.api.property;
 
 import de.dasbabypixel.annotations.Api;
-import de.dasbabypixel.api.property.DoubleStorage.Simple;
 
 @Api
 public final class DoubleHolder extends AbstractNumberHolder {
-	private final DoubleHolder partner;
-	private final DoubleStorage storage;
 
-	public DoubleHolder() {
-		this(0);
-	}
+    private final DoubleHolder partner;
+    private final DoubleStorage storage;
+    private double current;
 
-	DoubleHolder(DoubleStorage storage) {
-		this.storage = storage;
-		this.partner = new DoubleHolder(this, storage);
-	}
+    DoubleHolder() {
+        this(0);
+    }
 
-	DoubleHolder(DoubleHolder partner, DoubleStorage storage) {
-		this.partner = partner;
-		this.storage = storage;
-	}
+    DoubleHolder(double number) {
+        this.storage = new DoubleStorage.Simple();
+        write(number);
+        this.partner = new DoubleHolder(this);
+    }
 
-	DoubleHolder(DoubleHolder partner) {
-		this.partner = partner;
-		this.storage = new Simple();
-		write(partner.doubleValue());
-	}
+    DoubleHolder(DoubleStorage storage) {
+        this.storage = storage;
+        this.partner = new DoubleHolder(this, storage);
+    }
 
-	public DoubleHolder(double number) {
-		this.storage = new Simple();
-		write(number);
-		this.partner = new DoubleHolder(this);
-	}
+    private DoubleHolder(DoubleHolder partner, DoubleStorage storage) {
+        this.partner = partner;
+        this.storage = storage;
+    }
 
-	private void write(double number) {
-		storage.write(number);
-	}
+    private DoubleHolder(DoubleHolder partner) {
+        this.partner = partner;
+        this.storage = new DoubleStorage.Simple();
+        write(partner.doubleValue());
+    }
 
-	private double read() {
-		return storage.read();
-	}
+    @Override
+    public boolean checkForChanges() {
+        return storage.checkForChanges();
+    }
 
-	@Override
-	public int intValue() {
-		return (int) read();
-	}
+    @Override
+    void pollFromStorage() {
+        get();
+    }
 
-	@Override
-	public long longValue() {
-		return (long) read();
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        DoubleHolder that = (DoubleHolder) o;
+        return Double.compare(that.doubleValue(), this.doubleValue()) == 0;
+    }
 
-	@Override
-	public float floatValue() {
-		return (float) read();
-	}
+    private void write(double number) {
+        storage.write(number);
+        current = number;
+    }
 
-	@Override
-	public double doubleValue() {
-		return read();
-	}
+    private double get() {
+        if (storage.checkForChanges()) return current = storage.read();
+        return current;
+    }
 
-	@Override
-	public int hashCode() {
-		return Double.hashCode(read());
-	}
+    @Override
+    public int intValue() {
+        return (int) get();
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		DoubleHolder that = (DoubleHolder) o;
-		return Double.compare(that.doubleValue(), this.doubleValue()) == 0;
-	}
+    @Override
+    public long longValue() {
+        return (long) get();
+    }
 
-	@Override
-	public String toString() {
-		return Double.toString(doubleValue());
-	}
+    @Override
+    public float floatValue() {
+        return (float) get();
+    }
 
-	@Override
-	DoubleHolder partner() {
-		return partner;
-	}
+    @Override
+    public double doubleValue() {
+        return get();
+    }
 
-	@Override
-	void pollFromPartner() {
-		write(partner.doubleValue());
-	}
+    @Override
+    public int hashCode() {
+        return Double.hashCode(current);
+    }
 
-	@Override
-	public void set(Number number) {
-		write(number.doubleValue());
-	}
+    @Override
+    public String toString() {
+        return Double.toString(current);
+    }
 
-	@Override
-	public void set(double number) {
-		write(number);
-	}
+    @Override
+    DoubleHolder partner() {
+        return partner;
+    }
 
-	@Override
-	public void set(float number) {
-		write(number);
-	}
+    @Override
+    void pollFromPartner() {
+        if (storage.writable()) write(partner.current);
+        else current = partner.current;
+    }
 
-	@Override
-	public void set(long number) {
-		write(number);
-	}
+    @Override
+    public void set(Number number) {
+        write(number.doubleValue());
+    }
 
-	@Api
-	public void set(int number) {
-		write(number);
-	}
+    @Override
+    public void set(double number) {
+        write(number);
+    }
+
+    @Override
+    public void set(float number) {
+        write(number);
+    }
+
+    @Override
+    public void set(long number) {
+        write(number);
+    }
+
+    @Api
+    public void set(int number) {
+        write(number);
+    }
+
+    @Override
+    public boolean writable() {
+        return storage.writable();
+    }
 }

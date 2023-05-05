@@ -4,115 +4,132 @@ import de.dasbabypixel.annotations.Api;
 import de.dasbabypixel.api.property.IntegerStorage.Simple;
 
 public class IntegerHolder extends AbstractNumberHolder {
-	private final IntegerHolder partner;
-	private final IntegerStorage storage;
+    private final IntegerHolder partner;
+    private final IntegerStorage storage;
+    private int current;
 
-	public IntegerHolder() {
-		this(0);
-	}
+    IntegerHolder() {
+        this(0);
+    }
 
-	IntegerHolder(IntegerStorage storage) {
-		this.storage = storage;
-		this.partner = new IntegerHolder(this, storage);
-	}
+    IntegerHolder(int number) {
+        this.storage = new Simple();
+        write(number);
+        this.partner = new IntegerHolder(this);
+    }
 
-	IntegerHolder(IntegerHolder partner, IntegerStorage storage) {
-		this.partner = partner;
-		this.storage = storage;
-	}
+    IntegerHolder(IntegerStorage storage) {
+        this.storage = storage;
+        this.partner = new IntegerHolder(this, storage);
+    }
 
-	IntegerHolder(IntegerHolder partner) {
-		this.partner = partner;
-		this.storage = new Simple();
-		write(partner.intValue());
-	}
+    private IntegerHolder(IntegerHolder partner, IntegerStorage storage) {
+        this.partner = partner;
+        this.storage = storage;
+    }
 
-	public IntegerHolder(int number) {
-		this.storage = new Simple();
-		write(number);
-		this.partner = new IntegerHolder(this);
-	}
+    private IntegerHolder(IntegerHolder partner) {
+        this.partner = partner;
+        this.storage = new Simple();
+        write(partner.intValue());
+    }
 
-	protected void write(int number) {
-		storage.write(number);
-	}
+    @Override
+    public boolean checkForChanges() {
+        return storage.checkForChanges();
+    }
 
-	protected int read() {
-		return storage.read();
-	}
+    private void write(int number) {
+        storage.write(number);
+        current = number;
+    }
 
-	@Override
-	public int intValue() {
-		return read();
-	}
+    @Override
+    void pollFromStorage() {
+        get();
+    }
 
-	@Override
-	public long longValue() {
-		return read();
-	}
+    private int get() {
+        if (storage.checkForChanges()) return current = storage.read();
+        return current;
+    }
 
-	@Override
-	public float floatValue() {
-		return read();
-	}
+    @Override
+    public int intValue() {
+        return get();
+    }
 
-	@Override
-	public double doubleValue() {
-		return read();
-	}
+    @Override
+    public long longValue() {
+        return get();
+    }
 
-	@Override
-	public int hashCode() {
-		return Integer.hashCode(read());
-	}
+    @Override
+    public float floatValue() {
+        return get();
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		IntegerHolder that = (IntegerHolder) o;
-		return that.intValue() == intValue();
-	}
+    @Override
+    public double doubleValue() {
+        return get();
+    }
 
-	@Override
-	public String toString() {
-		return Integer.toString(intValue());
-	}
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(current);
+    }
 
-	@Override
-	IntegerHolder partner() {
-		return partner;
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IntegerHolder that = (IntegerHolder) o;
+        return that.current == current;
+    }
 
-	@Override
-	void pollFromPartner() {
-		write(partner.intValue());
-	}
+    @Override
+    public String toString() {
+        return Integer.toString(current);
+    }
 
-	@Override
-	public void set(Number number) {
-		write(number.intValue());
-	}
+    @Override
+    IntegerHolder partner() {
+        return partner;
+    }
 
-	@Override
-	public void set(double number) {
-		write((int) number);
-	}
+    @Override
+    void pollFromPartner() {
+        if (storage.writable()) write(partner.current);
+        else current = partner.current;
+    }
 
-	@Override
-	public void set(float number) {
-		write((int) number);
-	}
+    @Override
+    public void set(Number number) {
+        write(number.intValue());
+    }
 
-	@Override
-	public void set(long number) {
-		write((int) number);
-	}
+    @Override
+    public void set(double number) {
+        write((int) number);
+    }
 
-	@Api
-	public void set(int number) {
-		write(number);
-	}
+    @Override
+    public void set(float number) {
+        write((int) number);
+    }
+
+    @Override
+    public void set(long number) {
+        write((int) number);
+    }
+
+    @Api
+    public void set(int number) {
+        write(number);
+    }
+
+    @Override
+    public boolean writable() {
+        return storage.writable();
+    }
 }

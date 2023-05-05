@@ -1,118 +1,134 @@
 package de.dasbabypixel.api.property;
 
 import de.dasbabypixel.annotations.Api;
-import de.dasbabypixel.api.property.LongStorage.Simple;
 
 public class LongHolder extends AbstractNumberHolder {
-	private final LongHolder partner;
-	private final LongStorage storage;
+    private final LongHolder partner;
+    private final LongStorage storage;
+    private long current;
 
-	public LongHolder() {
-		this(0);
-	}
+    LongHolder() {
+        this(0);
+    }
 
-	LongHolder(LongStorage storage) {
-		this.storage = storage;
-		this.partner = new LongHolder(this, storage);
-	}
+    LongHolder(long number) {
+        this.storage = new LongStorage.Simple();
+        write(number);
+        this.partner = new LongHolder(this);
+    }
 
-	LongHolder(LongHolder partner, LongStorage storage) {
-		this.partner = partner;
-		this.storage = storage;
-	}
+    LongHolder(LongStorage storage) {
+        this.storage = storage;
+        this.partner = new LongHolder(this, storage);
+    }
 
-	LongHolder(LongHolder partner) {
-		this.partner = partner;
-		this.storage = new Simple();
-		write(partner.longValue());
-	}
+    private LongHolder(LongHolder partner, LongStorage storage) {
+        this.partner = partner;
+        this.storage = storage;
+    }
 
-	public LongHolder(long number) {
-		this.storage = new Simple();
-		write(number);
-		this.partner = new LongHolder(this);
-	}
+    private LongHolder(LongHolder partner) {
+        this.partner = partner;
+        this.storage = new LongStorage.Simple();
+        write(partner.longValue());
+    }
 
-	protected void write(long number) {
-		storage.write(number);
-	}
+    @Override
+    public boolean checkForChanges() {
+        return storage.checkForChanges();
+    }
 
-	protected long read() {
-		return storage.read();
-	}
+    @Override
+    void pollFromStorage() {
+        get();
+    }
 
-	@Override
-	public int intValue() {
-		return (int) read();
-	}
+    private void write(long number) {
+        storage.write(number);
+        current = number;
+    }
 
-	@Override
-	public long longValue() {
-		return read();
-	}
+    private long get() {
+        if (storage.checkForChanges()) return current = storage.read();
+        return current;
+    }
 
-	@Override
-	public float floatValue() {
-		return read();
-	}
+    @Override
+    public int intValue() {
+        return (int) get();
+    }
 
-	@Override
-	public double doubleValue() {
-		return read();
-	}
+    @Override
+    public long longValue() {
+        return get();
+    }
 
-	@Override
-	public int hashCode() {
-		return Long.hashCode(read());
-	}
+    @Override
+    public float floatValue() {
+        return get();
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		LongHolder that = (LongHolder) o;
-		return that.longValue() == longValue();
-	}
+    @Override
+    public double doubleValue() {
+        return get();
+    }
 
-	@Override
-	public String toString() {
-		return Long.toString(longValue());
-	}
+    @Override
+    public int hashCode() {
+        return Long.hashCode(current);
+    }
 
-	@Override
-	LongHolder partner() {
-		return partner;
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LongHolder that = (LongHolder) o;
+        return that.longValue() == longValue();
+    }
 
-	@Override
-	void pollFromPartner() {
-		write(partner.longValue());
-	}
+    @Override
+    public String toString() {
+        return Long.toString(current);
+    }
 
-	@Override
-	public void set(Number number) {
-		write(number.intValue());
-	}
+    @Override
+    LongHolder partner() {
+        return partner;
+    }
 
-	@Override
-	public void set(double number) {
-		write((long) number);
-	}
+    @Override
+    void pollFromPartner() {
+        if (storage.writable()) write(partner.current);
+        else current = partner.current;
+    }
 
-	@Override
-	public void set(float number) {
-		write((long) number);
-	}
+    @Override
+    public void set(Number number) {
+        write(number.longValue());
+    }
 
-	@Override
-	public void set(long number) {
-		write(number);
-	}
+    @Override
+    public void set(double number) {
+        write((long) number);
+    }
 
-	@Api
-	public void set(int number) {
-		write(number);
-	}
+    @Override
+    public void set(float number) {
+        write((long) number);
+    }
+
+    @Override
+    public void set(long number) {
+        write(number);
+    }
+
+    @Api
+    public void set(int number) {
+        write(number);
+    }
+
+    @Override
+    public boolean writable() {
+        return storage.writable();
+    }
 }
