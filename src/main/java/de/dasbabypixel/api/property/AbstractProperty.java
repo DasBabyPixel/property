@@ -63,14 +63,14 @@ abstract class AbstractProperty<T> implements Property<T> {
 	@Api
 	@Override
 	public AbstractProperty<T> addDependencies(Property<?>... dependencies) {
-		for (Property<?> dependency : dependencies) {
-			dependency.dependants(); // Try clean up unused dependants for more memory-friendly environment
-			synchronized (((AbstractProperty<?>) dependency).dependants) {
-				((AbstractProperty<?>) dependency).dependants.add(reference);
-			}
-		}
 		try {
 			lock.writeLock().lock();
+			for (Property<?> dependency : dependencies) {
+				if (dependency == this)
+					throw new IllegalStateException("Cant add yourself as dependency!");
+				dependency.dependants(); // Try clean up unused dependants for more memory-friendly environment
+				((AbstractProperty<?>) dependency).dependants.add(reference);
+			}
 			for (Property<?> dependency : dependencies)
 				this.dependencies.add((AbstractProperty<?>) dependency);
 		} finally {
@@ -82,24 +82,24 @@ abstract class AbstractProperty<T> implements Property<T> {
 	@Api
 	@Override
 	public AbstractProperty<T> removeDependencies(Property<?>... dependencies) {
-		for (Property<?> dependency : dependencies) {
-			synchronized (((AbstractProperty<?>) dependency).dependants) {
+		try {
+			lock.writeLock().lock();
+			for (Property<?> dependency : dependencies) {
 				Iterator<WeakReference<Property<?>>> it = ((AbstractProperty<?>) dependency).dependants.iterator();
 				while (it.hasNext()) {
 					WeakReference<Property<?>> ref = it.next();
 					Property<?> property = ref.get();
 					if (property == null) {
+						System.out.println("remove");
 						it.remove();
 						continue;
 					}
 					if (property == this) {
+						System.out.println("remove");
 						it.remove();
 					}
 				}
 			}
-		}
-		try {
-			lock.writeLock().lock();
 			for (Property<?> dependency : dependencies)
 				this.dependencies.remove(dependency);
 		} finally {
@@ -124,19 +124,23 @@ abstract class AbstractProperty<T> implements Property<T> {
 	@Api
 	@Override
 	public Collection<Property<?>> dependants() {
-		synchronized (dependants) {
+		try {
+			lock.readLock().lock();
 			Set<Property<?>> res = new HashSet<>();
 			Iterator<WeakReference<Property<?>>> it = dependants.iterator();
 			while (it.hasNext()) {
 				WeakReference<Property<?>> ref = it.next();
 				Property<?> p = ref.get();
 				if (p == null) {
+					System.out.println("remove");
 					it.remove();
 					continue;
 				}
 				res.add(p);
 			}
 			return Collections.unmodifiableCollection(res);
+		} finally {
+			lock.readLock().unlock();
 		}
 	}
 
@@ -267,6 +271,8 @@ abstract class AbstractProperty<T> implements Property<T> {
 	@Api
 	@Override
 	public void bind(Property<T> other) {
+		if (other == this)
+			throw new IllegalArgumentException("Cannot bind you to yourself!");
 		try {
 			lock.readLock().lock();
 			if (boundTo != null)
@@ -310,6 +316,7 @@ abstract class AbstractProperty<T> implements Property<T> {
 					if (bidirectional) {
 						boundTo.boundTo = null;
 					} else {
+						System.out.println("remove");
 						boundTo.dependants.remove(reference);
 					}
 				} finally {

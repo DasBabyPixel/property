@@ -11,7 +11,7 @@ java {
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(8))
 
 group 'de.dasbabypixel.api'
-version '2.0.0-rc17'
+version '2.0.0-rc26-SNAPSHOT'
 
 ext.moduleName = 'de.dasbabypixel.property'
 

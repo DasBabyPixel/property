@@ -50,8 +50,6 @@ public class Test {
         check(v9.intValue(), 4); // Still 9 because we didn't invalidateAll before and v7 is computing
         check(v10.intValue(), 5);
         i2.set(11);
-        v7.addListener((NumberChangeListener) (value, oldNumber, newNumber) -> System.out.println(oldNumber + "->" + newNumber));
-        v8.addListener((InvalidationListener) property -> System.out.println("v8 invalidated"));
         check(v7.intValue(), 11);
         check(v8.intValue(), 11);
         check(v9.intValue(), 11);
@@ -68,6 +66,11 @@ public class Test {
         i2.set(17);
         n1.invalidateAll();
         check(n3.doubleValue(), (17 + 5 + 7 + 1 + 10 + 5 + 5) / 3D);
+
+        NumberValue n4 = NumberValue.withValue(3D);
+        NumberValue n5 = NumberValue.withValue(2F);
+        NumberValue n6 = n4.add(n5).subtract(n3);
+        System.out.println(n6);
     }
 
     public static void check(Object o1, Object expect) {

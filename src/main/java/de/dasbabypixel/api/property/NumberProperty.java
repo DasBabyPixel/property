@@ -553,5 +553,11 @@ class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements N
             for (int i = 0; i < numberChangeListeners.size(); i++)
                 numberChangeListeners.get(i).handleChange(NumberProperty.this, oldValue, newValue);
         }
+
+        @Override
+        public String toString() {
+            return "NEvents{" + "numberInvalidationListeners=" + numberInvalidationListeners + ", numberChangeListeners=" + numberChangeListeners + ", invalidationListeners=" + invalidationListeners
+                    + ", changeListeners=" + changeListeners + '}';
+        }
     }
 }
