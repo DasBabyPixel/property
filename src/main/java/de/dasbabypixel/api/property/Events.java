@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 class Events<T> {
-    public final List<InvalidationListener> invalidationListeners = new ArrayList<>();
-    public final List<ChangeListener<? super T>> changeListeners = new ArrayList<>();
+    public final List<InvalidationListener> invalidationListeners = new ArrayList<>(0);
+    public final List<ChangeListener<? super T>> changeListeners = new ArrayList<>(0);
     protected final AbstractProperty<T> property;
 
     public Events(AbstractProperty<T> property) {

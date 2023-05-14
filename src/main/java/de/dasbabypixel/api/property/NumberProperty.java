@@ -548,8 +548,8 @@ class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements N
     }
 
     private class NEvents extends Events<AbstractNumberHolder> {
-        private final List<NumberInvalidationListener> numberInvalidationListeners = new ArrayList<>();
-        private final List<NumberChangeListener> numberChangeListeners = new ArrayList<>();
+        private final List<NumberInvalidationListener> numberInvalidationListeners = new ArrayList<>(0);
+        private final List<NumberChangeListener> numberChangeListeners = new ArrayList<>(0);
 
         public NEvents() {
             super(NumberProperty.this);

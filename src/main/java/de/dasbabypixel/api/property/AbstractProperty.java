@@ -11,8 +11,8 @@ import java.util.function.Function;
 @SuppressWarnings("AccessStaticViaInstance")
 abstract class AbstractProperty<T> implements Property<T> {
     protected static final ReadWriteLock lock = new ReentrantReadWriteLock();
-    protected final List<WeakReference<Property<?>>> dependants = new ArrayList<>();
-    protected final List<AbstractProperty<?>> dependencies = new ArrayList<>();
+    protected final List<WeakReference<Property<?>>> dependants = new ArrayList<>(0);
+    protected final List<AbstractProperty<?>> dependencies = new ArrayList<>(0);
     protected final WeakReference<Property<?>> reference = new WeakReference<>(this);
     protected final Storage<T> storage;
     protected Events<T> events = new Events<>(this);
