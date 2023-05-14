@@ -462,6 +462,21 @@ class NumberProperty extends AbstractProperty<AbstractNumberHolder> implements N
         return mapToNumberNNH(NumberUtils.pow(this.value(), value.value()), value);
     }
 
+    @Override
+    public NumberValue floor() {
+        return mapToNumberNH(NumberUtils.floor(this.value()));
+    }
+
+    @Override
+    public NumberValue ceil() {
+        return mapToNumberNH(NumberUtils.ceil(this.value()));
+    }
+
+    @Override
+    public NumberValue round() {
+        return mapToNumberNH(NumberUtils.round(this.value()));
+    }
+
     @Api
     @Override
     public NumberValue multiply(Number number) {

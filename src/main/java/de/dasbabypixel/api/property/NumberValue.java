@@ -178,6 +178,24 @@ public interface NumberValue extends Property<AbstractNumberHolder> {
     NumberValue negate();
 
     /**
+     * @return this {@link NumberValue} but rounded. This preserves the type behind the {@link NumberValue}, if it was a double the rounded {@link NumberValue} will also be a double
+     */
+    @Api
+    NumberValue round();
+
+    /**
+     * @return the ceil of this {@link NumberValue}. This preserves the type behind the {@link NumberValue}, if it was a double the ceiled {@link NumberValue} will also be a double
+     */
+    @Api
+    NumberValue ceil();
+
+    /**
+     * @return the floor of this {@link NumberValue}. This preserves the type behind the {@link NumberValue}, if it was a double the floored {@link NumberValue} will also be a double
+     */
+    @Api
+    NumberValue floor();
+
+    /**
      * @return this {@link NumberValue} multiplied with the other {@link Property NumberProperty}
      */
     @Api
